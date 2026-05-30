@@ -1,5 +1,6 @@
 use std::sync::Arc;
 use reqwest;
+use crate::events::EventsAPI;
 
 #[derive(Clone)]
 pub struct Client {
@@ -13,5 +14,9 @@ impl Client {
             key: Arc::from(api_key.into()),
             http: reqwest::Client::new(),
         }
+    }
+
+    pub fn events(&self) -> EventsAPI {
+        EventsAPI::new(self.clone())
     }
 }
