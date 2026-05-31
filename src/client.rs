@@ -32,7 +32,15 @@ pub enum CrateError {
     #[error("Http Error: {0}")]
     Http(#[from] reqwest::Error),
     #[error("URL parsing error: {0}")]
-    UrlParseError(#[from] url::ParseError),
+    UrlParse(#[from] url::ParseError),
+    #[error("Crate error: {0}")]
+    Custom(String),
+}
+
+impl From<&str> for CrateError {
+    fn from(msg: &str) -> Self {
+        CrateError::Custom(msg.to_string())
+    }
 }
 
 pub type Result<T> = std::result::Result<T, CrateError>;
