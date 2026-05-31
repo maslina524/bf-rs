@@ -1,8 +1,10 @@
 use std::collections::HashMap;
 
+use serde_json::{Value, Map};
 use reqwest::Method;
 
 use crate::{Client, Result};
+use crate::{get_string, get_i64, get_array};
 
 const GAMEMODES_ENDPOINT: &str = "https://api.brawlstars.com/v1/gamemodes";
 
@@ -24,32 +26,19 @@ impl EventsAPI {
 
         let mut ret = HashMap::new();
 
-        let obj_vec = value
+        let obj = value
             .as_object()
-            .ok_or("Strange Response")?
-            .get("items")
-            .ok_or("Strange Response")?
-            .as_array()
             .ok_or("Strange Response")?;
+        
+        let obj_vec = get_array!(&obj, "items").ok_or("Strange Response")?;
 
         for item in obj_vec {
             let obj = item
                 .as_object()
                 .ok_or("Strange Response")?;
 
-            let id = obj
-                .get("id")
-                .ok_or("Strange Response")?
-                .as_number()
-                .ok_or("Strange Response")?
-                .as_i64()
-                .ok_or("Strange Response")?;
-
-            let name = obj
-                .get("name")
-                .ok_or("Strange Response")?
-                .as_str()
-                .map(|s| s.to_string());
+            let id = get_i64!(&obj, "id").ok_or("Strange Response")?;
+            let name = get_string!(&obj, "name").map(|s| s.to_string());
 
             ret.insert(id, name);
         }
