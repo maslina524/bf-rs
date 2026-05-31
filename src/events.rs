@@ -22,7 +22,7 @@ impl EventsAPI {
             GAMEMODES_ENDPOINT, 
             Method::GET, 
             HashMap::new()
-        ).await.unwrap();
+        ).await?;
 
         let mut ret = HashMap::new();
 

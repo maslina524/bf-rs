@@ -1,11 +1,12 @@
 use std::{collections::HashMap, sync::Arc};
 
 use reqwest::{self, Method, Url};
-use serde_json::Value;
+use serde_json::{Value, Map};
 use thiserror::Error;
 use url;
 
 use crate::events::EventsAPI;
+use crate::get_string;
 
 #[derive(Debug, PartialEq, Error)]
 pub enum ApiError {
@@ -26,7 +27,7 @@ pub enum ApiError {
 #[derive(Debug, Error)]
 pub enum CrateError {
     #[error("Api Error: {0}")]
-    IncorrectParams(#[from] ApiError),
+    Api(#[from] ApiError),
     #[error("Json Error: {0}")]
     SerdeJson(#[from] serde_json::Error),
     #[error("Http Error: {0}")]
@@ -77,14 +78,12 @@ impl Client {
             let json_value = serde_json::from_str::<Value>(&raw_text)?;
             Ok(json_value)
         } else {
-            let error_msg = serde_json::from_str::<Value>(&raw_text)?
+            let binding = serde_json::from_str::<Value>(&raw_text)?;
+            let obj = binding
                 .as_object()
-                .unwrap()
-                .get("message")
-                .unwrap()
-                .as_str()
-                .unwrap()
-                .to_string();
+                .ok_or("Strange Response")?;
+            let error_msg = get_string!(&obj, "message").map(|s| s.to_string())
+                .ok_or("Strange Response")?;
 
             let api_error = match status.as_u16() {
                 400 => ApiError::IncorrectParams(error_msg),
@@ -95,7 +94,7 @@ impl Client {
                 _ if status.is_server_error() => ApiError::Unknown(error_msg),
                 _ => ApiError::Unknown(format!("Http {}: {}", status, error_msg)),
             };
-            Err(CrateError::IncorrectParams(api_error))
+            Err(CrateError::Api(api_error))
         }
     }
 }
