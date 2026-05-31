@@ -7,7 +7,7 @@ use thiserror::Error;
 use crate::events::EventsAPI;
 
 #[derive(Debug, PartialEq, Error)]
-pub enum BsRsError {
+pub enum ApiError {
     #[error("Incorrect Params (400): {0}")]
     IncorrectParams(String), // 400
     #[error("Access Denied (403): {0}")]
