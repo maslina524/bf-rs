@@ -19,6 +19,6 @@ The crate is designed to work only with the official Brawl Stars server
 - [ ] Brawlers
     - [ ] Get All
     - [ ] Info
-- [ ] Events
+- [x] Events
     - [x] Gamemodes
-    - [ ] Rotation
+    - [x] Rotation
