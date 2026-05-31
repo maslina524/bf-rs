@@ -7,8 +7,9 @@ use url;
 
 use crate::events::EventsAPI;
 use crate::get_string;
+use crate::players::PlayersAPI;
 
-#[derive(Debug, PartialEq, Error)]
+#[derive(Debug, Clone, PartialEq, Eq, Error)]
 pub enum ApiError {
     #[error("Incorrect Params (400): {0}")]
     IncorrectParams(String),
@@ -44,7 +45,7 @@ impl From<&str> for CrateError {
     }
 }
 
-pub type Result<T> = std::result::Result<T, CrateError>;
+pub type BsResult<T> = std::result::Result<T, CrateError>;
 
 #[derive(Clone)]
 pub struct Client {
@@ -64,7 +65,11 @@ impl Client {
         EventsAPI::new(self.clone())
     }
 
-    pub(crate) async fn request(&self, url: &str, method: Method, query: HashMap<&str, &str>) -> Result<Value> {
+    pub fn players(&self) -> PlayersAPI {
+        PlayersAPI::new(self.clone())
+    }
+
+    pub(crate) async fn request(&self, url: &str, method: Method, query: HashMap<&str, &str>) -> BsResult<Value> {
         let params_url = Url::parse_with_params(url, query)?;
         let response = self.http.request(method, params_url)
             .header("Authorization", format!("Bearer {}", self.key))
