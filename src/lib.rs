@@ -16,7 +16,7 @@ mod tests {
 
         let api_key = std::env::var("API_KEY").unwrap_or_default();
         let client = Client::new(api_key);
-        let ret = client.events().get_gamemodes().await;
+        let ret = client.events().gamemodes().await;
         println!("{ret:#?}");
     }
 }

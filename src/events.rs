@@ -17,7 +17,7 @@ impl EventsAPI {
         Self { inner: client }
     }
 
-    pub async fn get_gamemodes(&self) -> Result<HashMap<i64, Option<String>>> {
+    pub async fn gamemodes(&self) -> Result<HashMap<i64, Option<String>>> {
         let value = self.inner.request(
             GAMEMODES_ENDPOINT, 
             Method::GET, 
