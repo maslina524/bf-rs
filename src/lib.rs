@@ -1,8 +1,9 @@
 mod client;
 mod events;
+mod players;
 mod json;
 
-pub use client::{Client, ApiError, CrateError, Result};
+pub use client::{Client, ApiError, CrateError, BsResult};
 
 #[cfg(test)]
 mod tests {
