@@ -4,8 +4,8 @@ use chrono::{DateTime, Utc, NaiveDateTime};
 use serde_json::{Value, Map};
 use reqwest::Method;
 
-use crate::{Client, Result, get_object};
-use crate::{get_string, get_i64, get_array};
+use crate::{Client, BsResult};
+use crate::{get_object, get_string, get_i64, get_array};
 
 const GAMEMODES_ENDPOINT: &str = "https://api.brawlstars.com/v1/gamemodes";
 const ROTATION_ENDPOINT: &str = "https://api.brawlstars.com/v1/events/rotation";
@@ -35,7 +35,7 @@ impl EventsAPI {
         Self { inner: client }
     }
 
-    pub async fn gamemodes(&self) -> Result<HashMap<i64, Option<String>>> {
+    pub async fn gamemodes(&self) -> BsResult<HashMap<i64, Option<String>>> {
         let value = self.inner.request(
             GAMEMODES_ENDPOINT, 
             Method::GET, 
@@ -48,15 +48,15 @@ impl EventsAPI {
             .as_object()
             .ok_or("Strange Response")?;
         
-        let obj_vec = get_array!(&obj, "items").ok_or("Strange Response")?;
+        let obj_vec = get_array!(&obj, "items")?;
 
         for item in obj_vec {
             let obj = item
                 .as_object()
                 .ok_or("Strange Response")?;
 
-            let id = get_i64!(&obj, "id").ok_or("Strange Response")?;
-            let name = get_string!(&obj, "name").map(|s| s.to_string());
+            let id = get_i64!(&obj, "id")?;
+            let name = get_string!(&obj, "name").map(|s| s.to_string()).ok();
 
             ret.insert(id, name);
         }
@@ -64,7 +64,7 @@ impl EventsAPI {
         Ok(ret)
     }
 
-    pub async fn rotation(&self) -> Result<Vec<EventSlot>> {
+    pub async fn rotation(&self) -> BsResult<Vec<EventSlot>> {
         let value = self.inner.request(
             ROTATION_ENDPOINT, 
             Method::GET, 
@@ -81,20 +81,20 @@ impl EventsAPI {
                 .as_object()
                 .ok_or("Strange Response")?;
 
-            let start_time_str = get_string!(&obj, "startTime").ok_or("Strange Response")?;
+            let start_time_str = get_string!(&obj, "startTime")?;
             let start_time = date_time_from_str(start_time_str);
 
-            let end_time_str = get_string!(&obj, "endTime").ok_or("Strange Response")?;
+            let end_time_str = get_string!(&obj, "endTime")?;
             let end_time = date_time_from_str(end_time_str);
 
-            let slot_id = get_i64!(&obj, "slotId").ok_or("Strange Response")? as u32;
+            let slot_id = get_i64!(&obj, "slotId")? as u32;
 
-            let event_obj = get_object!(&obj, "event").ok_or("Strange Response")?;
+            let event_obj = get_object!(&obj, "event")?;
 
-            let id = get_i64!(&event_obj, "id").ok_or("Strange Response")? as u32;
-            let map = get_string!(&event_obj, "map").ok_or("Strange Response")?.to_string();
-            let mode_str = get_string!(&event_obj, "mode").ok_or("Strange Response")?.to_string();
-            let mode_id = get_i64!(&event_obj, "modeId").ok_or("Strange Response")?;
+            let id = get_i64!(&event_obj, "id")? as u32;
+            let map = get_string!(&event_obj, "map")?.to_string();
+            let mode_str = get_string!(&event_obj, "mode")?.to_string();
+            let mode_id = get_i64!(&event_obj, "modeId")?;
 
             let event = Event { id, map, mode_str, mode_id };
             let event_slot = EventSlot { start_time, end_time, slot_id, event };

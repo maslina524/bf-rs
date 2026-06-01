@@ -87,8 +87,7 @@ impl Client {
             let obj = binding
                 .as_object()
                 .ok_or("Strange Response")?;
-            let error_msg = get_string!(&obj, "message").map(|s| s.to_string())
-                .ok_or("Strange Response")?;
+            let error_msg = get_string!(&obj, "message").map(|s| s.to_string())?;
 
             let api_error = match status.as_u16() {
                 400 => ApiError::IncorrectParams(error_msg),
