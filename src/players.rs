@@ -27,6 +27,25 @@ pub enum NameColor {
     Purple      // 0xffcb5aff
 }
 
+impl NameColor {
+    fn get_hex(&self) -> u32 {
+        match self {
+            Self::White      => 0xffffff,
+            Self::Cyan       => 0xa2e3fe,
+            Self::Emerald    => 0x4ddba2,
+            Self::Orange     => 0xff9727,
+            Self::DarkOrange => 0xf9775d,
+            Self::Red        => 0xf05637,
+            Self::Yellow     => 0xf9c908,
+            Self::DarkYellow => 0xffce89,
+            Self::Green      => 0xa8e132,
+            Self::Blue       => 0x1ba5f5,
+            Self::Pink       => 0xff8afb,
+            Self::Purple     => 0xcb5aff
+        }
+    }
+}
+
 impl FromStr for NameColor {
     type Err = ();
     fn from_str(s: &str) -> Result<Self, Self::Err> {
