@@ -52,7 +52,7 @@ impl FromStr for NameColor {
         if !s.starts_with("0x") || !is_hex_string(&s[2..]) || s.len() < 8 {
             return Err(());
         }
-        let s = &s[(s.len() - 6)..].parse::<u32>().map_err(|_| ())?;
+        let s = u32::from_str_radix(&s[(s.len() - 6)..], 16).unwrap();
         let ret = match s {
             0xffffff => Self::White,
             0xa2e3fe => Self::Cyan,
@@ -198,7 +198,7 @@ pub struct BrawlerState {
 pub struct PlayerState {
     pub tag: Tag,
     pub name: String,
-    pub name_color: String,
+    pub name_color: NameColor,
     pub icon_id: u32,
     pub trophies: u32,
     pub h_trophies: u32,
@@ -294,8 +294,8 @@ impl PlayersAPI {
 
         let name = get_string!(&obj, "name")?.to_string();
 
-        let name_color = get_string!(&obj, "nameColor")?.to_string();
-        // let name_color = NameColor::Green;
+        let name_color_str = get_string!(&obj, "nameColor")?;
+        let name_color = NameColor::from_str(name_color_str).map_err(|_| "Incorrect name color hex")?;
         
         let icon = get_object!(&obj, "icon")?;
         let icon_id = get_i64!(&icon, "id")? as u32;
