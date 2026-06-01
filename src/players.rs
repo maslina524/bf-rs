@@ -68,7 +68,25 @@ impl RankedRank {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct BrawlerState {}
+pub struct BrawlerState {
+    id: u32,
+    name: String,
+    power: u8,
+    rank: u8,
+    trophies: u16,
+    h_trophies: u16,
+    prestige: u8,
+    win_streak: u16,
+    max_win_streak: u16,
+    skin: BrawlerSkin,
+    gadgets: Vec<BrawlerGadget>,
+    gears: Vec<BrawlerGear>,
+    star_powers: Vec<BrawlerStar>,
+    hyper_charge: BrawlerHyper,
+    gadget_buffie: bool,
+    star_buffie: bool,
+    hyper_buffie: bool
+}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct PlayerState {
@@ -183,7 +201,7 @@ impl PlayersAPI {
         let exp_level = get_i64!(&obj, "expLevel")? as u32;
         let exp_points = get_i64!(&obj, "expPoints")? as u32;
 
-        let qualified_for_championship = get_bool!(&obj, "isQualifiedFromChampionshipChallenge")?;
+        let qualified_for_championship = get_bool!(&obj, "isQualifiedFromChampionshipChallenge").unwrap_or_default();
 
         let trio_victories = get_i64!(&obj, "3vs3Victories")? as u32;
         let solo_victories = get_i64!(&obj, "soloVictories")? as u32;
@@ -215,6 +233,13 @@ impl PlayersAPI {
             club_name = get_string!(&club, "name").ok().map(|s| s.to_string());
         };
 
+        let mut brawlers = Vec::new();
+        let brawlers_obj = get_array!(&obj, "brawlers")?;
+        for brawler in brawlers_obj {
+            let brawler = brawler.as_object().ok_or("Strange Response")?;
+            brawlers.push(read_brawler(brawler));
+        }
+
         Ok(
             PlayerState {
                 tag, name, name_color, icon_id,
@@ -224,8 +249,12 @@ impl PlayersAPI {
                 robo_rumble_best_time, big_brawler_best_time,
                 ranked_season_id, rank, elo, h_season_rank,
                 h_season_elo, h_all_time_rank, h_all_time_elo,
-                club_tag, club_name, brawlers: Vec::new()
+                club_tag, club_name, brawlers
             }
         )
     }
+}
+
+fn read_brawler(brawler: &Map<String, Value>) -> BrawlerState {
+
 }
