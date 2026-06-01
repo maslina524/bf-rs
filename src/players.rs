@@ -82,13 +82,6 @@ fn is_hex_string(s: &str) -> bool {
     true
 }
 
-impl FromStr for NameColor {
-    type Err = ();
-    fn from_str(_string: &str) -> Result<Self, Self::Err> {
-        Ok(NameColor::White)
-    }
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RankedRank {
     Bronze(RankTier),
