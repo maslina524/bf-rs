@@ -29,6 +29,42 @@ pub enum NameColor {
 
 impl FromStr for NameColor {
     type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if !s.starts_with("0x") || !is_hex_string(&s[2..]) || s.len() < 8 {
+            return Err(());
+        }
+        let s = &s[(s.len() - 6)..].parse::<u32>().map_err(|_| ())?;
+        let ret = match s {
+            0xffffff => Self::White,
+            0xa2e3fe => Self::Cyan,
+            0x4ddba2 => Self::Emerald,
+            0xff9727 => Self::Orange,
+            0xf9775d => Self::DarkOrange,
+            0xf05637 => Self::Red,
+            0xf9c908 => Self::Yellow,
+            0xffce89 => Self::DarkYellow,
+            0xa8e132 => Self::Green,
+            0x1ba5f5 => Self::Blue,
+            0xff8afb => Self::Pink,
+            0xcb5aff => Self::Purple,
+            _ => return Err(())
+        };
+
+        Ok(ret)
+    }
+}
+
+fn is_hex_string(s: &str) -> bool {
+    for ch in s.chars() {
+        if !ch.is_ascii_hexdigit() {
+            return false;
+        }
+    }
+    true
+}
+
+impl FromStr for NameColor {
+    type Err = ();
     fn from_str(_string: &str) -> Result<Self, Self::Err> {
         Ok(NameColor::White)
     }
