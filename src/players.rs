@@ -116,52 +116,52 @@ type BrawlerHyper = NamedThing<BrawlerHyperType>;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct BrawlerState {
-    id: u32,
-    name: String,
-    power: u8,
-    rank: u8,
-    trophies: u16,
-    h_trophies: u16,
-    prestige: u8,
-    win_streak: u16,
-    max_win_streak: u16,
-    skin: Option<BrawlerSkin>,
-    gadgets: Vec<BrawlerGadget>,
-    gears: Vec<BrawlerGear>,
-    star_powers: Vec<BrawlerStar>,
-    hyper_charge: Option<BrawlerHyper>,
-    gadget_buffie: bool,
-    star_buffie: bool,
-    hyper_buffie: bool
+    pub id: u32,
+    pub name: String,
+    pub power: u8,
+    pub rank: u8,
+    pub trophies: u16,
+    pub h_trophies: u16,
+    pub prestige: u8,
+    pub win_streak: u16,
+    pub max_win_streak: u16,
+    pub skin: Option<BrawlerSkin>,
+    pub gadgets: Vec<BrawlerGadget>,
+    pub gears: Vec<BrawlerGear>,
+    pub star_powers: Vec<BrawlerStar>,
+    pub hyper_charge: Option<BrawlerHyper>,
+    pub gadget_buffie: bool,
+    pub star_buffie: bool,
+    pub hyper_buffie: bool
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct PlayerState {
-    tag: Tag,
-    name: String,
-    name_color: NameColor,
-    icon_id: u32,
-    trophies: u32,
-    h_trophies: u32,
-    prestige_level: u32,
-    exp_level: u32,
-    exp_points: u32,
-    qualified_for_championship: bool,
-    trio_victories: u32,
-    solo_victories: u32,
-    duo_victories: u32,
-    robo_rumble_best_time: u16,
-    big_brawler_best_time: u16,
-    ranked_season_id: u8,
-    rank: RankedRank,
-    elo: u16,
-    h_season_rank: RankedRank,
-    h_season_elo: u16,
-    h_all_time_rank: RankedRank,
-    h_all_time_elo: u16,
-    club_tag: Option<Tag>,
-    club_name: Option<String>,
-    brawlers: Vec<BrawlerState>
+    pub tag: Tag,
+    pub name: String,
+    pub name_color: String,
+    pub icon_id: u32,
+    pub trophies: u32,
+    pub h_trophies: u32,
+    pub prestige_level: u32,
+    pub exp_level: u32,
+    pub exp_points: u32,
+    pub qualified_for_championship: bool,
+    pub trio_victories: u32,
+    pub solo_victories: u32,
+    pub duo_victories: u32,
+    pub robo_rumble_best_time: u16,
+    pub big_brawler_best_time: u16,
+    pub ranked_season_id: u8,
+    pub rank: RankedRank,
+    pub elo: u16,
+    pub h_season_rank: RankedRank,
+    pub h_season_elo: u16,
+    pub h_all_time_rank: RankedRank,
+    pub h_all_time_elo: u16,
+    pub club_tag: Option<Tag>,
+    pub club_name: Option<String>,
+    pub brawlers: Vec<BrawlerState>
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Error)]
@@ -235,8 +235,8 @@ impl PlayersAPI {
 
         let name = get_string!(&obj, "name")?.to_string();
 
-        let name_color_str = get_string!(&obj, "nameColor")?;
-        let name_color = NameColor::Green;
+        let name_color = get_string!(&obj, "nameColor")?.to_string();
+        // let name_color = NameColor::Green;
         
         let icon = get_object!(&obj, "icon")?;
         let icon_id = get_i64!(&icon, "id")? as u32;
