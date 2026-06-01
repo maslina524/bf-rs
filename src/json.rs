@@ -37,3 +37,13 @@ macro_rules! get_object {
         _map.get(_key).and_then(|v| v.as_object()).ok_or("Strange Response")
     }};
 }
+
+#[macro_export]
+macro_rules! get_bool {
+    ($map:expr, $key:expr) => {{
+        let _map: &Map<String, Value> = $map;
+        let _key: &str = &$key;
+
+        _map.get(_key).and_then(|v| v.as_bool()).ok_or("Strange Response")
+    }};
+}
