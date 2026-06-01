@@ -49,7 +49,7 @@ impl RankedRank {
             2 => RankTier::III,
             _ => unreachable!("Incorrect int value for Rank")
         };
-        
+
         let rank_int = i / 3;
         let rank = match rank_int {
             0 => RankedRank::Bronze(tier),
@@ -94,8 +94,8 @@ pub struct PlayerState {
     h_season_elo: u16,
     h_all_time_rank: RankedRank,
     h_all_time_elo: u16,
-    club_tag: Tag,
-    club_name: String,
+    club_tag: Option<Tag>,
+    club_name: Option<String>,
     brawlers: Vec<BrawlerState>
 }
 
@@ -205,10 +205,15 @@ impl PlayersAPI {
         let h_all_time_rank = RankedRank::from(h_all_time_rank_int);
         let h_all_time_elo = get_i64!(&obj, "highestAllTimeRankedElo")? as u16;
 
-        let club = get_object!(&obj, "club")?;
-        let club_tag_str = get_string!(&club, "tag")?.to_string();
-        let club_tag = Tag::new(club_tag_str).unwrap();
-        let club_name = get_string!(&club, "name")?.to_string();
+        let mut club_tag: Option<Tag> = None;
+        let mut club_name: Option<String> = None;
+        if let Ok(club) = get_object!(&obj, "club") {
+            if let Ok(tag_str) = get_string!(&club, "tag") {
+                club_tag = Tag::new(tag_str).ok();
+            };
+
+            club_name = get_string!(&club, "name").ok().map(|s| s.to_string());
+        };
 
         Ok(
             PlayerState {
