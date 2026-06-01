@@ -27,6 +27,7 @@ pub enum RankedRank {
     Bronze(RankTier),
     Silver(RankTier),
     Gold(RankTier),
+    Diamond(RankTier),
     Mythic(RankTier),
     Legendary(RankTier),
     Masters(RankTier),
@@ -36,6 +37,34 @@ pub enum RankedRank {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RankTier {
     I, II, III
+}
+
+impl RankedRank {
+    pub fn from(i: u8) -> Self {
+        let i = i - 1;
+        let tier_int = i % 3;
+        let tier = match tier_int {
+            0 => RankTier::I,
+            1 => RankTier::II,
+            2 => RankTier::III,
+            _ => unreachable!("Incorrect int value for Rank")
+        };
+        
+        let rank_int = i / 3;
+        let rank = match rank_int {
+            0 => RankedRank::Bronze(tier),
+            1 => RankedRank::Silver(tier),
+            2 => RankedRank::Gold(tier),
+            3 => RankedRank::Diamond(tier),
+            4 => RankedRank::Mythic(tier),
+            5 => RankedRank::Legendary(tier),
+            6 => RankedRank::Masters(tier),
+            7 => RankedRank::Pro,
+            _ => unreachable!("Incorrect int value for Rank")
+        };
+
+        rank
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -164,16 +193,16 @@ impl PlayersAPI {
         let big_brawler_best_time = get_i64!(&obj, "bestTimeAsBigBrawler")? as u16;
 
         let ranked_season_id = get_i64!(&obj, "rankedSeasonId")? as u8;
-        let rank_int = get_i64!(&obj, "rankedSeasonId")? as u8;
-        let rank = RankedRank::Pro;
+        let rank_int = get_i64!(&obj, "rankedRank")? as u8;
+        let rank = RankedRank::from(rank_int);
         let elo = get_i64!(&obj, "rankedElo")? as u16;
         
         let h_season_rank_int = get_i64!(&obj, "highestSeasonRankedRank")? as u8;
-        let h_season_rank = RankedRank::Pro;
+        let h_season_rank = RankedRank::from(h_season_rank_int);
         let h_season_elo = get_i64!(&obj, "highestSeasonRankedElo")? as u16;
 
         let h_all_time_rank_int = get_i64!(&obj, "highestAllTimeRankedRank")? as u8;
-        let h_all_time_rank = RankedRank::Pro;
+        let h_all_time_rank = RankedRank::from(h_all_time_rank_int);
         let h_all_time_elo = get_i64!(&obj, "highestAllTimeRankedElo")? as u16;
 
         let club = get_object!(&obj, "club")?;
