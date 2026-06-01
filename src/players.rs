@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::marker::PhantomData;
 use std::str::FromStr;
 
 use reqwest::Method;
@@ -68,6 +69,52 @@ impl RankedRank {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+pub struct BrawlerSkinType;
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrawlerGadgetType;
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrawlerGearType;
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrawlerStarType;
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BrawlerHyperType;
+
+#[derive(Debug, Clone, PartialEq)]
+struct NamedThing<T> {
+    id: u32,
+    name: String,
+    _marker: std::marker::PhantomData<T>
+}
+
+impl<T> NamedThing<T> {
+    pub fn new(id: u32, name: String) -> Self {
+        Self {
+            id,
+            name,
+            _marker: PhantomData,
+        }
+    }
+    
+    pub fn get_id(&self) -> u32 {
+        self.id
+    }
+
+    pub fn get_name(&self) -> &str {
+        &self.name
+    }
+}
+
+type BrawlerSkin = NamedThing<BrawlerSkinType>;
+type BrawlerGadget = NamedThing<BrawlerGadgetType>;
+type BrawlerGear = NamedThing<BrawlerGearType>;
+type BrawlerStar = NamedThing<BrawlerStarType>;
+type BrawlerHyper = NamedThing<BrawlerHyperType>;
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct BrawlerState {
     id: u32,
     name: String,
@@ -78,11 +125,11 @@ pub struct BrawlerState {
     prestige: u8,
     win_streak: u16,
     max_win_streak: u16,
-    skin: BrawlerSkin,
+    skin: Option<BrawlerSkin>,
     gadgets: Vec<BrawlerGadget>,
     gears: Vec<BrawlerGear>,
     star_powers: Vec<BrawlerStar>,
-    hyper_charge: BrawlerHyper,
+    hyper_charge: Option<BrawlerHyper>,
     gadget_buffie: bool,
     star_buffie: bool,
     hyper_buffie: bool
@@ -237,7 +284,7 @@ impl PlayersAPI {
         let brawlers_obj = get_array!(&obj, "brawlers")?;
         for brawler in brawlers_obj {
             let brawler = brawler.as_object().ok_or("Strange Response")?;
-            brawlers.push(read_brawler(brawler));
+            brawlers.push(read_brawler(brawler)?);
         }
 
         Ok(
@@ -255,6 +302,75 @@ impl PlayersAPI {
     }
 }
 
-fn read_brawler(brawler: &Map<String, Value>) -> BrawlerState {
+fn read_brawler(brawler: &Map<String, Value>) -> BsResult<BrawlerState> {
+    let id = get_i64!(&brawler, "id")? as u32;
+    let name = get_string!(&brawler, "name")?.to_string();
+    let power = get_i64!(&brawler, "power")? as u8;
+    let rank = get_i64!(&brawler, "rank")? as u8;
+    let trophies = get_i64!(&brawler, "trophies")? as u16;
+    let h_trophies = get_i64!(&brawler, "highestTrophies")? as u16;
+    let prestige = get_i64!(&brawler, "prestigeLevel")? as u8;
+    let win_streak = get_i64!(&brawler, "currentWinStreak")? as u16;
+    let max_win_streak = get_i64!(&brawler, "maxWinStreak")? as u16;
 
+    let skin_obj = get_object!(&brawler, "skin")?;
+    let skin_id = get_i64!(&skin_obj, "id")? as u32;
+    let skin_name = get_string!(&skin_obj, "name")?;
+    let skin: Option<BrawlerSkin> = if skin_name == &name {
+        None
+    } else {
+        Some(
+            BrawlerSkin::new(skin_id, skin_name.to_string())
+        )
+    };
+
+    let mut gadgets: Vec<BrawlerGadget> = Vec::new();
+    let gadgets_vec = get_array!(&brawler, "gadgets")?;
+    for cur_gadget in gadgets_vec {
+        let gadget_obj = cur_gadget.as_object().ok_or("Strange Response")?;
+        let gadget_id = get_i64!(&gadget_obj, "id")? as u32;
+        let gadget_name = get_string!(&gadget_obj, "name")?.to_string();
+        gadgets.push(BrawlerGadget::new(gadget_id, gadget_name));
+    }
+
+    let mut gears: Vec<BrawlerGear> = Vec::new();
+    let gears_vec = get_array!(&brawler, "gears")?;
+    for cur_gear in gears_vec {
+        let gear_obj = cur_gear.as_object().ok_or("Strange Response")?;
+        let gear_id = get_i64!(&gear_obj, "id")? as u32;
+        let gear_name = get_string!(&gear_obj, "name")?.to_string();
+        gears.push(BrawlerGear::new(gear_id, gear_name));
+    }
+
+    let mut star_powers: Vec<BrawlerStar> = Vec::new();
+    let stars_vec = get_array!(&brawler, "starPowers")?;
+    for cur_star in stars_vec {
+        let star_obj = cur_star.as_object().ok_or("Strange Response")?;
+        let star_id = get_i64!(&star_obj, "id")? as u32;
+        let star_name = get_string!(&star_obj, "name")?.to_string();
+        star_powers.push(BrawlerStar::new(star_id, star_name));
+    }
+
+    let hyper_vec = get_array!(&brawler, "hyperCharges")?;
+    let hyper_charge = if let Some(value) = hyper_vec.get(0) {
+        let hyper_obj = value.as_object().ok_or("Strange Response")?;
+        let hyper_id = get_i64!(&hyper_obj, "id")? as u32;
+        let hyper_name = get_string!(&hyper_obj, "name")?.to_string();
+        Some(
+            BrawlerHyper::new(hyper_id, hyper_name)
+        )
+    } else { None };
+
+    let buffies_obj = get_object!(&brawler, "buffies")?;
+    let gadget_buffie = get_bool!(&buffies_obj, "gadget")?;
+    let star_buffie = get_bool!(&buffies_obj, "starPower")?;
+    let hyper_buffie = get_bool!(&buffies_obj, "hyperCharge")?;
+
+    Ok(
+        BrawlerState { 
+            id, name, power, rank, trophies, h_trophies, prestige,
+            win_streak, max_win_streak, skin, gadgets, gears, star_powers,
+            hyper_charge, gadget_buffie, star_buffie, hyper_buffie
+        }
+    )
 }
