@@ -13,13 +13,24 @@ const INFO_ENDPOINT: &str = "https://api.brawlstars.com/v1/players";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum NameColor {
-    Red, Green
+    White,      // 0xffffffff
+    Cyan,       // 0xffa2e3fe
+    Emerald,    // 0xff4ddba2
+    Orange,     // 0xffff9727
+    DarkOrange, // 0xfff9775d
+    Red,        // 0xfff05637
+    Yellow,     // 0xfff9c908
+    DarkYellow, // 0xffffce89
+    Green,      // 0xffa8e132
+    Blue,       // 0xff1ba5f5
+    Pink,       // 0xffff8afb
+    Purple      // 0xffcb5aff
 }
 
 impl FromStr for NameColor {
     type Err = ();
     fn from_str(_string: &str) -> Result<Self, Self::Err> {
-        Ok(NameColor::Red)
+        Ok(NameColor::White)
     }
 }
 
