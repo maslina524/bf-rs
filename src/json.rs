@@ -4,7 +4,7 @@ macro_rules! get_string {
         let _map: &Map<String, Value> = $map;
         let _key: &str = &$key;
 
-        _map.get(_key).and_then(|v| v.as_str())
+        _map.get(_key).and_then(|v| v.as_str()).ok_or("Strange Response")
     }};
 }
 
@@ -14,7 +14,7 @@ macro_rules! get_i64 {
         let _map: &Map<String, Value> = $map;
         let _key: &str = &$key;
 
-        _map.get(_key).and_then(|v| v.as_number().and_then(|v| v.as_i64()))
+        _map.get(_key).and_then(|v| v.as_number().and_then(|v| v.as_i64())).ok_or("Strange Response")
     }};
 }
 
@@ -24,7 +24,7 @@ macro_rules! get_array {
         let _map: &Map<String, Value> = $map;
         let _key: &str = &$key;
 
-        _map.get(_key).and_then(|v| v.as_array())
+        _map.get(_key).and_then(|v| v.as_array()).ok_or("Strange Response")
     }};
 }
 
@@ -34,6 +34,6 @@ macro_rules! get_object {
         let _map: &Map<String, Value> = $map;
         let _key: &str = &$key;
 
-        _map.get(_key).and_then(|v| v.as_object())
+        _map.get(_key).and_then(|v| v.as_object()).ok_or("Strange Response")
     }};
 }
